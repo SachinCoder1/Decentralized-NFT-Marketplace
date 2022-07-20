@@ -141,6 +141,7 @@ contract NFTMarketplace {
 
 
 
+
     /* Logics */
 
     // List an item
@@ -219,7 +220,20 @@ contract NFTMarketplace {
 
     // Withdraw money
 
-    
+    function withdrawMoney() external {
+        uint256 money = sellerAmounts[msg.sender];
+        if(money <= 0) {
+            revert NFTMarketplace__WithdrawCannotBeZero();
+        }
+
+        sellerAmounts[msg.sender] = 0;
+        (bool success, ) = payable(msg.sender).call{value: money}("");
+        if(!success){
+            revert NFTMarketplace__TransactionFailed();
+        }
+
+
+    }
 
 
 
