@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 error NFTMarketplace__reEntrancyCallFound(); // If reEntrancy attack
 error NFTMarketplace__NotOwner(); // If the sender is not the owner of the item
 error NFTMarketplace__ItemPriceShouldBeGreaterThenZero(); // When selling a item if the price is 0
+error NFTMarketplace__WithdrawCannotBeZero(); // If there is no money when withdrawing.
+error NFTMarketplace__TransactionFailed(); // If transaction fail.
 error NFTMarketplace__ItemNotApproved(); // If the item is not approved.
 error NFTMarketplace__ItemAlreadyListed(address _nftAddress, uint256 _tokenId); // If the item owner try to list the item again.
 error NFTMarketplace__ItemNotAlreadyListed(
@@ -21,12 +23,13 @@ error NFTMarketplace__ItemPriceNotSatisfied(
 ); // When buying if the msg.value is less then the item price.
 
 contract NFTMarketplace {
-    bool locked;
+    bool private locked;
 
-    /* State variables */
     constructor() {
         locked = false;
     }
+
+    /* State variables */
 
     /*  Struct */
     struct Listing {
@@ -36,7 +39,7 @@ contract NFTMarketplace {
 
     /* mapping */
     mapping(address => mapping(uint256 => Listing)) private allListings; // Keep track of all listings
-    mapping(address => uint256) private sellerAmount;
+    mapping(address => uint256) private sellerAmounts;
 
     /* events */
     event ItemList(
@@ -51,6 +54,19 @@ contract NFTMarketplace {
         address indexed _nftAddress,
         uint256 indexed _tokenId,
         uint256 listingPrice
+    );
+
+    event ItemCancelled(
+        address indexed seller,
+        address indexed _nftAddress,
+        uint256 indexed _tokenId
+    );
+
+    event ItemUpdated(
+        address indexed seller,
+        address indexed _nftAddress,
+        uint256 indexed _tokenId,
+        uint256 _newPrice
     );
 
     /* Modifiers */
@@ -107,10 +123,27 @@ contract NFTMarketplace {
         _;
     }
 
+
+
+
+
+
+
     /* Pure/Get functions */
+
+
+
+
+
+
+
+
+
+
 
     /* Logics */
 
+    // List an item
     function listItem(
         address _nftAddress,
         uint256 _tokenId,
@@ -131,6 +164,7 @@ contract NFTMarketplace {
         emit ItemList(msg.sender, _nftAddress, _tokenId, _price);
     }
 
+    // Buy the item
     function buyItem(address _nftAddress, uint256 _tokenId)
         external
         payable
@@ -145,7 +179,7 @@ contract NFTMarketplace {
                 listing.price
             );
         }
-        sellerAmount[listing.seller] += msg.value;
+        sellerAmounts[listing.seller] += msg.value;
         delete (allListings[_nftAddress][_tokenId]);
         IERC721(_nftAddress).safeTransferFrom(
             listing.seller,
@@ -155,4 +189,44 @@ contract NFTMarketplace {
 
         emit ItemBought(msg.sender, _nftAddress, _tokenId, listing.price);
     }
+
+    // Cancel a item
+    function cancelItem(address _nftAddress, uint256 _tokenId)
+        external
+        onlyOwner(msg.sender, _nftAddress, _tokenId)
+        isListed(_nftAddress, _tokenId)
+    {
+        delete (allListings[_nftAddress][_tokenId]);
+        emit ItemCancelled(msg.sender, _nftAddress, _tokenId);
+    }
+
+    // Update any item
+
+    function updateItem(
+        address _nftAddress,
+        uint256 _tokenId,
+        uint256 _newPrice
+    )
+        external
+        onlyOwner(msg.sender, _nftAddress, _tokenId)
+        isListed(_nftAddress, _tokenId)
+    {
+        allListings[_nftAddress][_tokenId].price = _newPrice;
+        emit ItemUpdated(msg.sender, _nftAddress, _tokenId, _newPrice);
+        
+    }
+
+
+    // Withdraw money
+
+    
+
+
+
+
+
+
+
+
+
 }
