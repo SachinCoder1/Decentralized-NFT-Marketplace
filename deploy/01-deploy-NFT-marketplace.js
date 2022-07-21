@@ -33,3 +33,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     verify(NFTMarketplace.address);
   }
 };
+
+
+module.exports.tags = ["all", "nftmarketplace", "main"]

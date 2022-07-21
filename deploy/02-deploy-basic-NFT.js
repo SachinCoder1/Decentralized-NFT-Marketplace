@@ -33,3 +33,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     verify(BasicNFT.address);
   }
 };
+
+
+module.exports.tags = ["all", "basicnft"]
