@@ -131,7 +131,15 @@ contract NFTMarketplace {
 
     /* Pure/Get functions */
 
+    
+    function getSpecificListing(address _nftAddress, uint256 _tokenId) external view returns(Listing memory) {
+       return allListings[_nftAddress][_tokenId];
+    }
 
+    // Get withdraw money
+    function getSellerEarnedMoney(address _seller) external view returns (uint256) {
+        return sellerAmounts[_seller];
+    }
 
 
 
