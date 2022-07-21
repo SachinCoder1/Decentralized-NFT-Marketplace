@@ -27,9 +27,24 @@ if(!developmentChains.includes(network.name)){
             await NFTMarketplace.listItem(BasicNFT.address, TOKEN_ID, PRiCE);
             const getListing = await NFTMarketplace.getSpecificListing(BasicNFT.address, TOKEN_ID);
             assert(getListing.price.toString() == PRiCE.toString());
-        })
+        }),2
 
-       
+        it("buy an item", async () => {
+
+            await NFTMarketplace.listItem(BasicNFT.address, TOKEN_ID, PRiCE);
+
+            const newPlayerOfMarketplace = NFTMarketplace.connect(player);
+            await newPlayerOfMarketplace.buyItem(BasicNFT.address, TOKEN_ID, {value: PRiCE});
+
+            const newNFTOwner = await BasicNFT.ownerOf(TOKEN_ID);
+            const withdrawal = await NFTMarketplace.getSellerEarnedMoney(deployer);
+
+            assert(newNFTOwner.toString() == player.address);
+            assert(withdrawal.toString() == PRiCE.toString());
+
+
+
+        })
 
 
 
